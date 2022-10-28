@@ -56,7 +56,7 @@ public class Player : MonoBehaviour
         float horizontal = pInput.actions["Horizontal"].ReadValue<float>() * MOUSE_SENSITIVITY;
         float vertical = pInput.actions["Vertical"].ReadValue<float>() * MOUSE_SENSITIVITY;
 
-        xRot -= vertical * Time.deltaTime;
+        xRot += vertical * Time.deltaTime;
         xRot = Mathf.Clamp(xRot, -85f, 85f);
 
         mainCam.localRotation = Quaternion.Euler(xRot, 0f, 0f);
