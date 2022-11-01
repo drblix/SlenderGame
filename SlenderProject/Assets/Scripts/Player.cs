@@ -3,8 +3,8 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    private PlayerInput pInput;
     private CharacterController cc;
+    private PlayerInput pInput;
     private Rigidbody rb;
 
     private Transform mainCam;
@@ -32,10 +32,19 @@ public class Player : MonoBehaviour
         CameraMovement();
         BodyMovement();
 
-        if (!Physics.CheckSphere(checkObj.position, .2f, ~LayerMask.GetMask("Terrain")))
+        if (!Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain")))
         {
-            transform.position -= new Vector3(0f, 0.05f, 0f);
+            transform.position -= new Vector3(0f, 2f * Time.deltaTime, 0f);
+            //rb.MovePosition(transform.position - new Vector3(0f, 3f * Time.deltaTime * 10f, 0f));
         }
+
+        //if (!Physics.CheckSphere(checkObj.position, .2f, ~LayerMask.GetMask("Terrain")))
+        //{
+        //    print("tick");
+        //    //rb.MovePosition(transform.position + new Vector3(0f, 3f * Time.deltaTime * 10f, 0f));
+        //    //rb.MovePosition(rb.position + new Vector3(0f, -3f, 0f));
+        //    transform.position -= new Vector3(0f, 2f * Time.deltaTime * 5f, 0f);
+        //}
 
         if (transform.position.y < -5f) { transform.position = new Vector3(217f, 4f, 218f); }
         
@@ -48,6 +57,7 @@ public class Player : MonoBehaviour
         float vertical = pInput.actions["ForwardBack"].ReadValue<float>();
 
         Vector3 movementVect = MOVEMENT_SPEED * Time.deltaTime * new Vector3(horizontal, 0f, vertical).normalized;
+        //rb.MovePosition(rb.position + transform.TransformDirection(movementVect));
         cc.Move(transform.TransformDirection(movementVect));
     }
 
