@@ -14,6 +14,7 @@ public class Player : MonoBehaviour
 
     private const float MOUSE_SENSITIVITY = 30f;
     private const float MOVEMENT_SPEED = 3f;
+    private const float FALL_SPEED = 9f;
 
     private void Awake()
     {
@@ -26,7 +27,7 @@ public class Player : MonoBehaviour
 
         Cursor.lockState = CursorLockMode.Locked;
     }
-
+    
     private void Update()
     {
         CameraMovement();
@@ -34,17 +35,8 @@ public class Player : MonoBehaviour
 
         if (!Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain")))
         {
-            transform.position -= new Vector3(0f, 2f * Time.deltaTime, 0f);
-            //rb.MovePosition(transform.position - new Vector3(0f, 3f * Time.deltaTime * 10f, 0f));
+            transform.position += FALL_SPEED * Time.deltaTime * Vector3.down;
         }
-
-        //if (!Physics.CheckSphere(checkObj.position, .2f, ~LayerMask.GetMask("Terrain")))
-        //{
-        //    print("tick");
-        //    //rb.MovePosition(transform.position + new Vector3(0f, 3f * Time.deltaTime * 10f, 0f));
-        //    //rb.MovePosition(rb.position + new Vector3(0f, -3f, 0f));
-        //    transform.position -= new Vector3(0f, 2f * Time.deltaTime * 5f, 0f);
-        //}
 
         if (transform.position.y < -5f) { transform.position = new Vector3(217f, 4f, 218f); }
         
@@ -57,7 +49,6 @@ public class Player : MonoBehaviour
         float vertical = pInput.actions["ForwardBack"].ReadValue<float>();
 
         Vector3 movementVect = MOVEMENT_SPEED * Time.deltaTime * new Vector3(horizontal, 0f, vertical).normalized;
-        //rb.MovePosition(rb.position + transform.TransformDirection(movementVect));
         cc.Move(transform.TransformDirection(movementVect));
     }
 
