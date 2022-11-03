@@ -3,6 +3,9 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
+    public bool bobbingEnabled = true;
+    public float mouseSensitivity = 30f;
+
     private CharacterController cc;
     private PlayerInput pInput;
     private Rigidbody rb;
@@ -12,6 +15,7 @@ public class Player : MonoBehaviour
     private Transform mainCam;
     private Transform checkObj;
     private Transform flashlight;
+    private Transform head;
 
     private Vector3 idleVec;
     private Quaternion idleRot;
@@ -20,23 +24,38 @@ public class Player : MonoBehaviour
 
     private float xRot = 0f;
 
-    private float mouseSensitivity = 30f;
-
-    private const float MOVEMENT_SPEED = 3f;
-    private const float FALL_SPEED = 9f;
-
     private bool isRunning = false;
     private Vector3 lastPos;
 
+    [Header("Movement Settings")]
+    [SerializeField]
+    private float movementSpeed = 3f;
+    [SerializeField]
+    private float fallSpeed = 9f;
+
     [SerializeField]
     private AudioClip[] stepClips;
+
+    [Header("Headbob Settings")]
+    [SerializeField]
+    private float bobFrequency = 5f;
+    [SerializeField]
+    private float vertAmp = .1f;
+    [SerializeField]
+    private float horzAmp = .1f;
+    [SerializeField] [Range(0f, 1f)]
+    private float bobSmoothing = .1f;
+
+    private float walkTime;
+    private Vector3 targetBobPos;
 
     private void Awake()
     {
         cc = GetComponent<CharacterController>();
         pInput = GetComponent<PlayerInput>();
         rb = GetComponent<Rigidbody>();
-        mainCam = transform.Find("MainCamera");
+        head = transform.Find("Head");
+        mainCam = head.Find("MainCamera");
 
         cam = mainCam.GetComponent<Camera>();
         stepSource = mainCam.GetComponent<AudioSource>();
@@ -69,11 +88,13 @@ public class Player : MonoBehaviour
         BodyMovement();
         Sprinting();
         HandleFootsteps();
+        if (bobbingEnabled)
+            HandleBobbing();
 
         // checks if player is on the ground, applying gravity if not
         if (!IsGrounded())
         {
-            transform.position += FALL_SPEED * Time.deltaTime * Vector3.down;
+            transform.position += fallSpeed * Time.deltaTime * Vector3.down;
         }
 
         // fail-safe if the player clips through the ground somehow
@@ -87,7 +108,7 @@ public class Player : MonoBehaviour
         float horizontal = pInput.actions["LeftRight"].ReadValue<float>();
         float vertical = pInput.actions["ForwardBack"].ReadValue<float>();
 
-        Vector3 movementVect = MOVEMENT_SPEED * Time.deltaTime * new Vector3(horizontal, 0f, vertical).normalized;
+        Vector3 movementVect = movementSpeed * Time.deltaTime * new Vector3(horizontal, 0f, vertical).normalized;
 
         movementVect = isRunning ? movementVect * 1.5f : movementVect;
 
@@ -141,6 +162,45 @@ public class Player : MonoBehaviour
         stepSource.clip = stepClips[Random.Range(0, stepClips.Length)];
         stepSource.Play();
     }
+
+    private void HandleBobbing()
+    {
+        walkTime = IsMoving() ? walkTime += Time.deltaTime : 0f;
+
+        targetBobPos = head.position + CalcOffset(walkTime);
+
+        mainCam.position = Vector3.Lerp(mainCam.position, targetBobPos, bobSmoothing);
+
+        mainCam.position = (mainCam.position - targetBobPos).magnitude <= 0.001f ? targetBobPos : mainCam.position;
+    }
+
+   
+    private Vector3 CalcOffset(float time)
+    {
+        Vector3 offset = Vector3.zero;
+
+        if (time > 0f)
+        {
+            float horzOff;
+            float vertOff;
+
+            if (isRunning)
+            {
+                horzOff = Mathf.Cos(time * bobFrequency) * horzAmp * 1.25f;
+                vertOff = Mathf.Sin(time * bobFrequency * 2) * vertAmp * 1.25f;
+            }
+            else
+            {
+                horzOff = Mathf.Cos(time * bobFrequency) * horzAmp;
+                vertOff = Mathf.Sin(time * bobFrequency * 2) * vertAmp;
+            }
+
+            offset = transform.right * horzOff + transform.up * vertOff;
+        }
+
+        return offset;
+    }
+    
 
     private bool IsGrounded() => Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain"));
 

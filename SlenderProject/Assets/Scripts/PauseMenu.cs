@@ -11,9 +11,12 @@ public class PauseMenu : MonoBehaviour
     [SerializeField]
     private RectTransform optionsMenu;
 
+    private bool optionsOpen = false;
+
     private void Awake()
     {
         canvas = GetComponent<Canvas>();
+        canvas.enabled = false;
     }
 
     private void Update()
@@ -38,5 +41,25 @@ public class PauseMenu : MonoBehaviour
 
         homeMenu.anchoredPosition = new Vector2(0f, 0f);
         optionsMenu.anchoredPosition = new Vector2(800f, 0f);
+        optionsOpen = false;
     }
+
+    public void ToggleOptions()
+    {
+        if (!optionsOpen)
+        {
+            homeMenu.anchoredPosition = new Vector2(-800f, 0f);
+            optionsMenu.anchoredPosition = new Vector2(0f, 0f);
+        }
+        else
+        {
+            homeMenu.anchoredPosition = new Vector2(0f, 0f);
+            optionsMenu.anchoredPosition = new Vector2(800f, 0f);
+        }
+
+        optionsOpen = !optionsOpen;
+    }
+
+    // will go to the main menu at some point
+    public void QuitGame() => Application.Quit();
 }
