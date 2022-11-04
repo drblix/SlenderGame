@@ -3,9 +3,6 @@ using UnityEngine.InputSystem;
 
 public class Player : MonoBehaviour
 {
-    public bool bobbingEnabled = true;
-    public float mouseSensitivity = 30f;
-
     private CharacterController cc;
     private PlayerInput pInput;
     private Rigidbody rb;
@@ -43,11 +40,13 @@ public class Player : MonoBehaviour
     private float vertAmp = .1f;
     [SerializeField]
     private float horzAmp = .1f;
-    [SerializeField] [Range(0f, 1f)]
+    [SerializeField][Range(0f, 1f)]
     private float bobSmoothing = .1f;
 
     private float walkTime;
     private Vector3 targetBobPos;
+
+    private float[] layerDistances = new float[32];
 
     private void Awake()
     {
@@ -67,11 +66,10 @@ public class Player : MonoBehaviour
         // creates manual clipping distances for specific objects
         // [8] would be map objects, which have a clipping distance of 25 units
         // numbers correlate to their layer number
-        float[] distances = new float[32];
-        distances[8] = 25;
-        cam.layerCullDistances = distances;
+        layerDistances[8] = 25;
+        cam.layerCullDistances = layerDistances;
 
-        transform.position = new Vector3(215f, 2f, 210f);
+        //transform.position = new Vector3(215f, 2f, 210f);
 
         // flashlight pos states
         idleVec = new(0f, -.25f, 0f);
@@ -88,7 +86,7 @@ public class Player : MonoBehaviour
         BodyMovement();
         Sprinting();
         HandleFootsteps();
-        if (bobbingEnabled)
+        if (PlayerSettings.headBobbing)
             HandleBobbing();
 
         // checks if player is on the ground, applying gravity if not
@@ -110,17 +108,29 @@ public class Player : MonoBehaviour
 
         Vector3 movementVect = movementSpeed * Time.deltaTime * new Vector3(horizontal, 0f, vertical).normalized;
 
-        movementVect = isRunning ? movementVect * 1.5f : movementVect;
+        // increases move speed if running straight
+        // decreases move speed if moving backwards
+        if (isRunning && (movementVect.z > 0f || (movementVect.x != 0f && !(movementVect.z < 0f))))
+        {
+            movementVect *= 1.5f;
+        }
+        else if (movementVect.z < 0f)
+        {
+            isRunning = false;
+            stepSource.pitch = 1f;
+            movementVect *= 0.8f;
+        }
 
-        cc.Move(transform.TransformDirection(movementVect));
+        movementVect = transform.TransformDirection(movementVect);
+        cc.Move(movementVect);
     }
 
     private void CameraMovement()
     {
-        float horizontal = pInput.actions["Horizontal"].ReadValue<float>() * mouseSensitivity;
-        float vertical = pInput.actions["Vertical"].ReadValue<float>() * mouseSensitivity;
+        float horizontal = pInput.actions["Horizontal"].ReadValue<float>() * PlayerSettings.mouseSensitivity;
+        float vertical = pInput.actions["Vertical"].ReadValue<float>() * PlayerSettings.mouseSensitivity;
 
-        xRot += vertical * Time.deltaTime;
+        xRot = PlayerSettings.invertMouse ? xRot += vertical * Time.deltaTime : xRot -= vertical * Time.deltaTime;
         xRot = Mathf.Clamp(xRot, -85f, 85f);
 
         mainCam.localRotation = Quaternion.Euler(xRot, 0f, 0f);
@@ -174,7 +184,7 @@ public class Player : MonoBehaviour
         mainCam.position = (mainCam.position - targetBobPos).magnitude <= 0.001f ? targetBobPos : mainCam.position;
     }
 
-   
+
     private Vector3 CalcOffset(float time)
     {
         Vector3 offset = Vector3.zero;
@@ -200,9 +210,37 @@ public class Player : MonoBehaviour
 
         return offset;
     }
-    
+
+    public void ToggleAmbience(bool state)
+    {
+        // false = pause ; true = resume
+        foreach (AudioSource source in GetComponents<AudioSource>())
+        {
+            if (state && !source.isPlaying)
+            {
+                source.UnPause();
+            }
+            else if (!state)
+            {
+                source.Pause();
+            }
+        }
+    }
+
+    public void SetObjDistance(float num)
+    {
+        layerDistances[8] = Mathf.RoundToInt(num);
+        cam.layerCullDistances = layerDistances;
+    }
 
     private bool IsGrounded() => Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain"));
 
     private bool IsMoving() => transform.position != lastPos;
+}
+
+public static class PlayerSettings
+{
+    public static float mouseSensitivity = 30f;
+    public static bool headBobbing = true;
+    public static bool invertMouse = false;
 }

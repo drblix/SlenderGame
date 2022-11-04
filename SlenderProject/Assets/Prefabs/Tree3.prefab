@@ -126,7 +126,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 2.39, y: 13, z: 2.13}
+  m_Size: {x: 2.03, y: 13, z: 1.98}
   m_Center: {x: 0.39, y: 6.403449, z: 0.34}
 --- !u!21 &3313023434853372563
 Material:

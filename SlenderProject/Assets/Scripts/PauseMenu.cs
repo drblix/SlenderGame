@@ -1,22 +1,39 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
+using UnityEngine.UI;
 
 public class PauseMenu : MonoBehaviour
 {
+    private Player player;
     private Canvas canvas;
 
     [SerializeField]
-    private RectTransform homeMenu;
+    private GameObject homeMenu;
     [SerializeField]
-    private RectTransform optionsMenu;
+    private GameObject optionsMenu;
 
-    private bool optionsOpen = false;
+    [SerializeField]
+    private TextMeshProUGUI sensDisplay;
+    [SerializeField]
+    private TextMeshProUGUI disDisplay;
+    [SerializeField]
+    private Toggle headBobbing;
+    [SerializeField]
+    private Toggle invertMouse;
 
     private void Awake()
     {
+        player = FindObjectOfType<Player>();
         canvas = GetComponent<Canvas>();
+
         canvas.enabled = false;
+        homeMenu.SetActive(true);
+        optionsMenu.SetActive(false);
+
+        sensDisplay.SetText(Mathf.RoundToInt(PlayerSettings.mouseSensitivity).ToString());
+        headBobbing.isOn = PlayerSettings.headBobbing;
+        invertMouse.isOn = PlayerSettings.invertMouse;
     }
 
     private void Update()
@@ -27,6 +44,7 @@ public class PauseMenu : MonoBehaviour
     public void ToggleMenu()
     {
         canvas.enabled = !canvas.enabled;
+        player.ToggleAmbience(!canvas.enabled);
 
         if (canvas.enabled)
         {
@@ -38,26 +56,28 @@ public class PauseMenu : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Time.timeScale = 1;
         }
-
-        homeMenu.anchoredPosition = new Vector2(0f, 0f);
-        optionsMenu.anchoredPosition = new Vector2(800f, 0f);
-        optionsOpen = false;
     }
 
-    public void ToggleOptions()
+    public void ToggleInvert(bool state)
     {
-        if (!optionsOpen)
-        {
-            homeMenu.anchoredPosition = new Vector2(-800f, 0f);
-            optionsMenu.anchoredPosition = new Vector2(0f, 0f);
-        }
-        else
-        {
-            homeMenu.anchoredPosition = new Vector2(0f, 0f);
-            optionsMenu.anchoredPosition = new Vector2(800f, 0f);
-        }
+        PlayerSettings.invertMouse = state;
+    }
 
-        optionsOpen = !optionsOpen;
+    public void ToggleBob(bool state)
+    {
+        PlayerSettings.headBobbing = state;
+    }
+
+    public void ChangeSens(float newS)
+    {
+        PlayerSettings.mouseSensitivity = newS;
+        sensDisplay.SetText(Mathf.RoundToInt(PlayerSettings.mouseSensitivity).ToString());
+    }
+
+    public void ChangeObjDis(float newN)
+    {
+        player.SetObjDistance(newN);
+        disDisplay.SetText(Mathf.RoundToInt(newN).ToString());
     }
 
     // will go to the main menu at some point
