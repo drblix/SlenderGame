@@ -8,6 +8,7 @@ public class Player : MonoBehaviour
     private Rigidbody rb;
     private Camera cam;
     private AudioSource stepSource;
+    private AudioSource breathingSource;
 
     private Transform mainCam;
     private Transform checkObj;
@@ -22,6 +23,7 @@ public class Player : MonoBehaviour
     private float xRot = 0f;
 
     private bool isRunning = false;
+    public bool IsRunning { get { return isRunning; } }
     private Vector3 lastPos;
 
     [Header("Movement Settings")]
@@ -29,6 +31,10 @@ public class Player : MonoBehaviour
     private float movementSpeed = 3f;
     [SerializeField]
     private float fallSpeed = 9f;
+
+    private const float MAX_STAMINA = 6f;
+    private const float SPRINT_THRESHOLD = 3.5f;
+    private float currentStamina = 6f;
 
     [SerializeField]
     private AudioClip[] stepClips;
@@ -58,6 +64,7 @@ public class Player : MonoBehaviour
 
         cam = mainCam.GetComponent<Camera>();
         stepSource = mainCam.GetComponent<AudioSource>();
+        breathingSource = head.GetComponent<AudioSource>();
         checkObj = transform.Find("CheckObj");
         flashlight = mainCam.Find("Flashlight");
 
@@ -66,7 +73,7 @@ public class Player : MonoBehaviour
         // creates manual clipping distances for specific objects
         // [8] would be map objects, which have a clipping distance of 25 units
         // numbers correlate to their layer number
-        layerDistances[8] = 25;
+        layerDistances[8] = PlayerSettings.mapObjDraw;
         cam.layerCullDistances = layerDistances;
 
         //transform.position = new Vector3(215f, 2f, 210f);
@@ -76,6 +83,8 @@ public class Player : MonoBehaviour
         idleRot = Quaternion.Euler(Vector3.zero);
         runningVec = new(0.63f, -0.63f, 0f);
         runningRot = Quaternion.Euler(30f, 0f, 0f);
+
+        currentStamina = MAX_STAMINA;
 
         Time.timeScale = 1f;
     }
@@ -110,11 +119,11 @@ public class Player : MonoBehaviour
 
         // increases move speed if running straight
         // decreases move speed if moving backwards
-        if (isRunning && (movementVect.z > 0f || (movementVect.x != 0f && !(movementVect.z < 0f))))
+        if (isRunning && (movementVect.z > 0f || (movementVect.x != 0f && !(movementVect.z < 0f))) && currentStamina > 0f)
         {
             movementVect *= 1.5f;
         }
-        else if (movementVect.z < 0f)
+        else if (movementVect.z < 0f || currentStamina <= 0f)
         {
             isRunning = false;
             stepSource.pitch = 1f;
@@ -141,15 +150,31 @@ public class Player : MonoBehaviour
 
     private void Sprinting()
     {
-        if (pInput.actions["LeftShift"].WasPressedThisFrame() && IsGrounded() && IsMoving())
+        if (pInput.actions["LeftShift"].WasPressedThisFrame() && IsGrounded() && IsMoving() && currentStamina >= SPRINT_THRESHOLD)
         {
             isRunning = true;
             stepSource.pitch = 1.3f;
+            flashlight.parent = head;
+            currentStamina -= Time.deltaTime;
         }
         else if (pInput.actions["LeftShift"].WasReleasedThisFrame() || !IsMoving())
         {
             isRunning = false;
             stepSource.pitch = 1f;
+            flashlight.parent = mainCam;
+            currentStamina += Time.deltaTime / 1.5f;
+        }
+
+        currentStamina = isRunning ? currentStamina -= Time.deltaTime : currentStamina += (Time.deltaTime / 1.5f);
+        currentStamina = Mathf.Clamp(currentStamina, 0f, MAX_STAMINA);
+
+        if (currentStamina <= 0f && !breathingSource.isPlaying)
+        {
+            breathingSource.Play();
+        }
+        else if (breathingSource.isPlaying && currentStamina >= SPRINT_THRESHOLD)
+        {
+            breathingSource.Stop();
         }
 
         float slerpTime = Time.deltaTime / .25f;
@@ -229,7 +254,8 @@ public class Player : MonoBehaviour
 
     public void SetObjDistance(float num)
     {
-        layerDistances[8] = Mathf.RoundToInt(num);
+        PlayerSettings.mapObjDraw = (int)num;
+        layerDistances[8] = PlayerSettings.mapObjDraw;
         cam.layerCullDistances = layerDistances;
     }
 
@@ -241,6 +267,7 @@ public class Player : MonoBehaviour
 public static class PlayerSettings
 {
     public static float mouseSensitivity = 30f;
+    public static int mapObjDraw = 50;
     public static bool headBobbing = true;
     public static bool invertMouse = false;
 }

@@ -7,6 +7,8 @@ public class PauseMenu : MonoBehaviour
 {
     private Player player;
     private Canvas canvas;
+    [SerializeField]
+    private Canvas gameEventCanvas;
 
     [SerializeField]
     private GameObject homeMenu;
@@ -32,6 +34,8 @@ public class PauseMenu : MonoBehaviour
         optionsMenu.SetActive(false);
 
         sensDisplay.SetText(Mathf.RoundToInt(PlayerSettings.mouseSensitivity).ToString());
+        disDisplay.SetText(PlayerSettings.mapObjDraw.ToString());
+
         headBobbing.isOn = PlayerSettings.headBobbing;
         invertMouse.isOn = PlayerSettings.invertMouse;
     }
@@ -44,30 +48,36 @@ public class PauseMenu : MonoBehaviour
     public void ToggleMenu()
     {
         canvas.enabled = !canvas.enabled;
+        gameEventCanvas.enabled = !gameEventCanvas.enabled;
         player.ToggleAmbience(!canvas.enabled);
 
         if (canvas.enabled)
         {
             Cursor.lockState = CursorLockMode.None;
             Time.timeScale = 0;
+
+            foreach (AudioSource source in FindObjectsOfType<AudioSource>())
+            {
+                if (source.isPlaying)
+                {
+                    source.Pause();
+                }
+            }
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Time.timeScale = 1;
+
+            foreach (AudioSource source in FindObjectsOfType<AudioSource>())
+            {
+                source.UnPause();
+            }
         }
     }
 
-    public void ToggleInvert(bool state)
-    {
-        PlayerSettings.invertMouse = state;
-    }
-
-    public void ToggleBob(bool state)
-    {
-        PlayerSettings.headBobbing = state;
-    }
-
+    public void ToggleInvert(bool state) => PlayerSettings.invertMouse = state;
+    public void ToggleBob(bool state) => PlayerSettings.headBobbing = state;
     public void ChangeSens(float newS)
     {
         PlayerSettings.mouseSensitivity = newS;
@@ -77,7 +87,7 @@ public class PauseMenu : MonoBehaviour
     public void ChangeObjDis(float newN)
     {
         player.SetObjDistance(newN);
-        disDisplay.SetText(Mathf.RoundToInt(newN).ToString());
+        disDisplay.SetText(PlayerSettings.mapObjDraw.ToString());
     }
 
     // will go to the main menu at some point
