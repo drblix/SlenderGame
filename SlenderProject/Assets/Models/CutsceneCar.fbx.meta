@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 18ef4f9b3d9825e47a7435baeeab852d
+guid: 90bf9e8f7d2dba54c8c0705bbef1f839
 ModelImporter:
   serializedVersion: 22102
   internalIDToNameTable: []
@@ -9,11 +9,6 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: CarTexture
     second: {fileID: 2100000, guid: 521c9a40f0119ca4d8ca5aa0cdbd8ad8, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: WheelTexture
-    second: {fileID: 2100000, guid: 0d3a4fb8663674c4c947b5c54c582af3, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
