@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,7 +6,6 @@ public class Player : MonoBehaviour
 {
     private CharacterController cc;
     private PlayerInput pInput;
-    private Rigidbody rb;
     private Camera cam;
     private AudioSource stepSource;
     private AudioSource breathingSource;
@@ -49,16 +49,19 @@ public class Player : MonoBehaviour
     [SerializeField][Range(0f, 1f)]
     private float bobSmoothing = .1f;
 
+    private bool canFall = false;
+    private bool canMove = false;
+
     private float walkTime;
     private Vector3 targetBobPos;
 
     private float[] layerDistances = new float[32];
 
+
     private void Awake()
     {
         cc = GetComponent<CharacterController>();
         pInput = GetComponent<PlayerInput>();
-        rb = GetComponent<Rigidbody>();
         head = transform.Find("Head");
         mainCam = head.Find("MainCamera");
 
@@ -87,6 +90,8 @@ public class Player : MonoBehaviour
         currentStamina = MAX_STAMINA;
 
         Time.timeScale = 1f;
+
+        StartCoroutine(SpawnWait(1f));
     }
 
     private void Update()
@@ -99,7 +104,7 @@ public class Player : MonoBehaviour
             HandleBobbing();
 
         // checks if player is on the ground, applying gravity if not
-        if (!IsGrounded())
+        if (!IsGrounded() && canFall)
         {
             transform.position += fallSpeed * Time.deltaTime * Vector3.down;
         }
@@ -112,6 +117,8 @@ public class Player : MonoBehaviour
 
     private void BodyMovement()
     {
+        if (!canMove) { return; }
+
         float horizontal = pInput.actions["LeftRight"].ReadValue<float>();
         float vertical = pInput.actions["ForwardBack"].ReadValue<float>();
 
@@ -262,6 +269,13 @@ public class Player : MonoBehaviour
     private bool IsGrounded() => Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain"));
 
     private bool IsMoving() => transform.position != lastPos;
+
+    private IEnumerator SpawnWait(float time)
+    {
+        yield return new WaitForSeconds(time);
+        canFall = true;
+        canMove = true;
+    }
 }
 
 public static class PlayerSettings
