@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 705507994}
-  m_IndirectSpecularColor: {r: 0.04899513, g: 0.016451955, b: 0.0005418505, a: 1}
+  m_IndirectSpecularColor: {r: 0.04899522, g: 0.016451975, b: 0.0005418507, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -19319,7 +19319,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1540561639}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 230.25, y: 2, z: 250.93}
+  m_LocalPosition: {x: 230.25, y: 3.42, z: 250.93}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -21031,12 +21031,12 @@ Terrain:
   m_Enabled: 1
   serializedVersion: 6
   m_TerrainData: {fileID: 15600000, guid: 34a1a60ffdfef8d4089a38a04a88360b, type: 2}
-  m_TreeDistance: 564
+  m_TreeDistance: 286
   m_TreeBillboardDistance: 273
   m_TreeCrossFadeLength: 5
   m_TreeMaximumFullLODCount: 400
-  m_DetailObjectDistance: 90
-  m_DetailObjectDensity: 1
+  m_DetailObjectDistance: 70
+  m_DetailObjectDensity: 0.75
   m_HeightmapPixelError: 5
   m_SplatMapDistance: 1000
   m_HeightmapMaximumLOD: 0
