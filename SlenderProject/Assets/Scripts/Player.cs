@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class Player : MonoBehaviour
     private Camera cam;
     private AudioSource stepSource;
     private AudioSource breathingSource;
+
+    [SerializeField]
+    private Image blocker;
 
     private Transform mainCam;
     private Transform checkObj;
@@ -49,8 +53,7 @@ public class Player : MonoBehaviour
     [SerializeField][Range(0f, 1f)]
     private float bobSmoothing = .1f;
 
-    private bool canFall = false;
-    private bool canMove = false;
+    private bool canInteract = false;
 
     private float walkTime;
     private Vector3 targetBobPos;
@@ -91,11 +94,13 @@ public class Player : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        StartCoroutine(SpawnWait(1f));
+        StartCoroutine(SpawnSequence());
     }
 
     private void Update()
     {
+        if (!canInteract) { return; }
+
         CameraMovement();
         BodyMovement();
         Sprinting();
@@ -104,7 +109,7 @@ public class Player : MonoBehaviour
             HandleBobbing();
 
         // checks if player is on the ground, applying gravity if not
-        if (!IsGrounded() && canFall)
+        if (!IsGrounded())
         {
             transform.position += fallSpeed * Time.deltaTime * Vector3.down;
         }
@@ -117,8 +122,6 @@ public class Player : MonoBehaviour
 
     private void BodyMovement()
     {
-        if (!canMove) { return; }
-
         float horizontal = pInput.actions["LeftRight"].ReadValue<float>();
         float vertical = pInput.actions["ForwardBack"].ReadValue<float>();
 
@@ -270,11 +273,21 @@ public class Player : MonoBehaviour
 
     private bool IsMoving() => transform.position != lastPos;
 
-    private IEnumerator SpawnWait(float time)
+    private IEnumerator SpawnSequence()
     {
-        yield return new WaitForSeconds(time);
-        canFall = true;
-        canMove = true;
+        yield return new WaitForSeconds(1f);
+        stepSource.Play();
+        yield return new WaitForSeconds(1.25f);
+                        
+        while (blocker.color.a > 0.2f)
+        {
+            float newA = Mathf.Lerp(blocker.color.a, 0f, Time.deltaTime / 1.85f);
+            blocker.color = new(0, 0, 0, newA);
+            yield return null;
+        }
+
+        blocker.gameObject.SetActive(false);
+        canInteract = true;
     }
 }
 
