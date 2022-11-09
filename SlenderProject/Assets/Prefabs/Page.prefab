@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 334740797925148312}
   - component: {fileID: 334740797925148313}
   - component: {fileID: 334740797925148326}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Page
   m_TagString: Page
   m_Icon: {fileID: 0}
@@ -34,7 +34,7 @@ Transform:
   - {fileID: 5579032206118530204}
   - {fileID: 5775693275055257177}
   m_Father: {fileID: 0}
-  m_RootOrder: -1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 96.03299, y: 0, z: 195}
 --- !u!114 &334740797925148312
 MonoBehaviour:
@@ -168,7 +168,7 @@ GameObject:
   - component: {fileID: 5775693275055257177}
   - component: {fileID: 6678342790990732883}
   - component: {fileID: 4505359542199826413}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: polySurface2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -251,7 +251,7 @@ GameObject:
   - component: {fileID: 5579032206118530204}
   - component: {fileID: 4432424109205714609}
   - component: {fileID: 4046824711104001019}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: polySurface1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
