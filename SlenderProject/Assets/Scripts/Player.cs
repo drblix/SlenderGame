@@ -6,6 +6,8 @@ using TMPro;
 
 public class Player : MonoBehaviour
 {
+    private GameManager gameManager;
+
     private CharacterController cc;
     private PlayerInput pInput;
     private Camera cam;
@@ -66,6 +68,8 @@ public class Player : MonoBehaviour
 
     private void Awake()
     {
+        gameManager = FindObjectOfType<GameManager>();
+
         cc = GetComponent<CharacterController>();
         pInput = GetComponent<PlayerInput>();
         head = transform.Find("Head");
@@ -102,7 +106,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (!canInteract) { return; }
+        if (!canInteract || gameManager.GameOver) { return; }
 
         CameraMovement();
         BodyMovement();

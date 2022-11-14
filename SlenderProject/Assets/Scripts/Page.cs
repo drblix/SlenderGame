@@ -22,7 +22,7 @@ public class Page : MonoBehaviour
         bCollider.enabled = false;
 
         source.Play();
-        StartCoroutine(gameManager.PageAdded(gameObject));
+        StartCoroutine(gameManager.PageAdded());
         //Destroy(gameObject, source.clip.length);
 
         foreach (Transform child in transform)

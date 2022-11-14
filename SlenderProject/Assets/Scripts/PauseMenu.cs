@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class PauseMenu : MonoBehaviour
 {
     private Player player;
+    private GameManager gameManager;
+
     private Canvas canvas;
     [SerializeField]
     private Canvas gameEventCanvas;
@@ -26,6 +28,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Awake()
     {
+        gameManager = FindObjectOfType<GameManager>();
         player = FindObjectOfType<Player>();
         canvas = GetComponent<Canvas>();
 
@@ -42,7 +45,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame) { ToggleMenu(); }
+        if (Keyboard.current.escapeKey.wasPressedThisFrame && !gameManager.GameOver) { ToggleMenu(); }
     }
 
     public void ToggleMenu()
