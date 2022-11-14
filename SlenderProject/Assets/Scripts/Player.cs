@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using TMPro;
 
 public class Player : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private Image blocker;
+    [SerializeField]
+    private TextMeshProUGUI introductionText;
 
     private Transform mainCam;
     private Transform checkObj;
@@ -108,16 +111,19 @@ public class Player : MonoBehaviour
         if (PlayerSettings.headBobbing)
             HandleBobbing();
 
+        // fail-safe if the player clips through the ground somehow
+        if (transform.position.y < -5f) { transform.position = new Vector3(217f, 4f, 218f); }
+
+        lastPos = transform.position;
+    }
+
+    private void FixedUpdate()
+    {
         // checks if player is on the ground, applying gravity if not
         if (!IsGrounded())
         {
             transform.position += fallSpeed * Time.deltaTime * Vector3.down;
         }
-
-        // fail-safe if the player clips through the ground somehow
-        if (transform.position.y < -5f) { transform.position = new Vector3(217f, 4f, 218f); }
-
-        lastPos = transform.position;
     }
 
     private void BodyMovement()
@@ -157,7 +163,7 @@ public class Player : MonoBehaviour
         Vector3 rotVect = horizontal * Time.deltaTime * Vector3.up;
         transform.Rotate(rotVect);
     }
-
+    
     private void Sprinting()
     {
         if (pInput.actions["LeftShift"].WasPressedThisFrame() && IsGrounded() && IsMoving() && currentStamina >= SPRINT_THRESHOLD)
@@ -269,8 +275,7 @@ public class Player : MonoBehaviour
         cam.layerCullDistances = layerDistances;
     }
 
-    private bool IsGrounded() => Physics.Raycast(checkObj.position, Vector3.down, .5f, LayerMask.GetMask("Terrain"));
-
+    private bool IsGrounded() => Physics.CheckSphere(checkObj.position, .25f, LayerMask.GetMask("Terrain"));
     private bool IsMoving() => transform.position != lastPos;
 
     private IEnumerator SpawnSequence()
@@ -288,6 +293,13 @@ public class Player : MonoBehaviour
 
         blocker.gameObject.SetActive(false);
         canInteract = true;
+
+        yield return new WaitForSeconds(4f);
+        introductionText.SetText("Collect all 8 pages");
+        yield return new WaitForSeconds(5f);
+        introductionText.SetText("Escape in your car afterwards");
+        yield return new WaitForSeconds(5f);
+        introductionText.gameObject.SetActive(false);
     }
 }
 

@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Slender
+  - Page
   layers:
   - Default
   - TransparentFX
@@ -16,8 +17,8 @@ TagManager:
   - Trees
   - MapObjects
   - Stars
-  - 
-  - 
+  - Player
+  - Slender
   - 
   - 
   - 

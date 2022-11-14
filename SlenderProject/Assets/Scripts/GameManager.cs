@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
 using TMPro;
-using Unity.VisualScripting;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,26 +9,27 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private TextMeshProUGUI pageDisplay;
+
     [SerializeField]
     private AudioClip[] noises;
 
-    private int pagesNeeded = 8;
+    private const int PAGES_NEEDED = 8;
     private int currentPages = 0;
+    public int CurrentPages { get { return currentPages; } }
 
     public IEnumerator PageAdded(GameObject page)
     {
         // add one to current pages
         // display ui element that shows current pages out of pages needed
         currentPages++;
-        pageDisplay.SetText(currentPages + " / " + pagesNeeded + " Pages");
+        pageDisplay.SetText(currentPages + " / " + PAGES_NEEDED + " Pages");
         pageDisplay.gameObject.SetActive(true);
 
         yield return new WaitForSeconds(2f);
 
         pageDisplay.gameObject.SetActive(false);
-        //Destroy(page);
 
-        if (currentPages == 1)
+        if (CurrentPages == 1)
         {
             StartCoroutine(PlaySound(noises[0], 4));
         }
