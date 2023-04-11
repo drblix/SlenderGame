@@ -45,7 +45,7 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Keyboard.current.escapeKey.wasPressedThisFrame && !gameManager.GameOver) { ToggleMenu(); }
+        if (Keyboard.current.escapeKey.wasPressedThisFrame && !gameManager.gameOver) { ToggleMenu(); }
     }
 
     public void ToggleMenu()

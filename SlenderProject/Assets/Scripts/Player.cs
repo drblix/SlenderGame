@@ -106,7 +106,7 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        if (!canInteract || gameManager.GameOver) { return; }
+        if (!canInteract || gameManager.gameOver) { return; }
 
         CameraMovement();
         BodyMovement();

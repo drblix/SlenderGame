@@ -22,6 +22,11 @@ public class WaypointManager : MonoBehaviour
         }
     }
 
+    // TODO: 
+    // revamp waypoint system by picking random locations on the map instead of set waypoints
+    // use Physics.CheckBox() to prevent spawning inside objects 
+    // for waypoints close to player, get a position within a circle created around the player
+    // ^^ no idea how to do the above bit, but it's all about experimentation! :D
     public Transform GetClosestWaypoint()
     {
         Vector3 plrPos = player.transform.position;
@@ -51,5 +56,16 @@ public class WaypointManager : MonoBehaviour
         while (newPoint == curPoint) { newPoint = waypoints[Random.Range(0, waypoints.Length)]; }
 
         return newPoint;
+    }
+
+    public static Vector3 RandomPointInBox(Vector3 center, Vector3 size)
+    {
+        Vector3 randomVec = new Vector3(
+            (Random.value - .5f) * size.x,
+            (Random.value - .5f) * size.y,
+            (Random.value - .5f) * size.z
+        );
+
+        return center + randomVec;
     }
 }

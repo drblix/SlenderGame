@@ -53,12 +53,14 @@ public class SlenderAI : MonoBehaviour
         mainCam = player.Find("Head").Find("MainCamera");
 
         slenderMan.transform.position = Vector3.zero;
-        //slenderMan.SetActive(false);
+        slenderMan.SetActive(false);
+
+        gameManager.pageCollected.AddListener(UpdateDifficulty);
     }
 
     private void Update()
     {
-        if (gameManager.GameOver) { return; }
+        if (gameManager.gameOver) { return; }
 
         CheckVisiblity();
 
@@ -106,7 +108,7 @@ public class SlenderAI : MonoBehaviour
                 jumpscareTimer = 12f;
             }
 
-            lookAmount += Time.deltaTime * Mathf.Clamp(gameManager.CurrentPages / 4f, 1f, 2f);
+            lookAmount += Time.deltaTime * Mathf.Clamp(gameManager.currentPages / 4f, 1f, 2f);
         }
         else
         {
@@ -128,10 +130,10 @@ public class SlenderAI : MonoBehaviour
 
     public void UpdateDifficulty()
     {
-        tpTimer -= MAX_TP_TIMER - (20f * gameManager.CurrentPages);
-        sightDist = MIN_SIGHT_DIST + (15.625f * gameManager.CurrentPages);
+        tpTimer = MAX_TP_TIMER - (20f * gameManager.currentPages);
+        sightDist = MIN_SIGHT_DIST + (15.625f * gameManager.currentPages);
 
-        if (gameManager.CurrentPages >= 1) { slenderMan.SetActive(true); }
+        if (gameManager.currentPages >= 1) { slenderMan.SetActive(true); }
     }
 
     public bool CanSeePlayer()

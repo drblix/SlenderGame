@@ -1,36 +1,29 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    [SerializeField]
-    private RawImage staticVid;
-    [SerializeField]
-    private Image headshotImg;
-    [SerializeField]
-    private Image blockerImg;
-    [SerializeField]
-    private AudioSource harshStatic;
+    public UnityEvent pageCollected;
 
-    [SerializeField]
-    private AudioSource spookSource;
+    [SerializeField] private RawImage staticVid;
 
-    [SerializeField]
-    private TextMeshProUGUI pageDisplay;
+    [SerializeField] private Image headshotImg, blockerImg;
 
-    [SerializeField]
-    private AudioClip[] noises;
+    [SerializeField] private AudioSource harshStatic, spookSource;
+
+    [SerializeField] private TextMeshProUGUI pageDisplay;
+
+    [SerializeField] private AudioClip[] noises;
 
     private const int PAGES_NEEDED = 8;
 
     // starts at 0
-    private int currentPages = 8;
-    public int CurrentPages { get { return currentPages; } }
+    public int currentPages { get; private set; } = 0;
 
-    private bool gameOver = false;
-    public bool GameOver { get { return gameOver; } }
+    public bool gameOver { get; private set; } = false;
 
     public IEnumerator PageAdded()
     {
@@ -44,10 +37,10 @@ public class GameManager : MonoBehaviour
 
         pageDisplay.gameObject.SetActive(false);
 
-        if (CurrentPages == 1)
-        {
+        if (currentPages == 1)
             StartCoroutine(PlaySound(noises[0], 4));
-        }
+
+        pageCollected.Invoke();
     }
 
     private IEnumerator PlaySound(AudioClip clip, int repeatNum)
@@ -67,7 +60,8 @@ public class GameManager : MonoBehaviour
     {
         gameOver = true;
         staticVid.color = Color.white;
-        print("Game over!");
+        Debug.Log("Game over!");
+
         yield return new WaitForSeconds(1.8f);
         blockerImg.gameObject.SetActive(true);
         blockerImg.color = Color.black;
