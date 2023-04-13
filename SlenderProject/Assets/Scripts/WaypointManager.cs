@@ -7,65 +7,77 @@ public class WaypointManager : MonoBehaviour
     [SerializeField]
     private Transform[] waypoints;
 
+    private static Transform playerTransform;
+    private static readonly Vector2 boxSize = new(515, 468);
+    private static readonly Vector3 boxCenter = new(361, 0f, 336.7f);
+
     private void Awake()
     {
         player = FindObjectOfType<Player>();
+        playerTransform = player.transform;
+    }
 
-        // locks all waypoint transforms to the ground
-        for (int i = 0; i < waypoints.Length; i++)
+    public static Vector3 GetRandomPoint()
+    {
+        bool validSpot = false;
+        Vector3 groundPoint = Vector3.zero;
+
+        do
         {
-            Ray ray = new(waypoints[i].position, Vector3.down);
-            if (Physics.Raycast(ray, out RaycastHit hit, 100f, LayerMask.GetMask("Terrain")))
+            Vector2 randPoint = new Vector2(
+                (Random.value - .5f) * boxSize.x,
+                (Random.value - .5f) * boxSize.y
+            );
+
+            if (Physics.Raycast(new Vector3(randPoint.x, 100f, randPoint.y) + boxCenter, Vector3.down, out RaycastHit info, 250f))
             {
-                waypoints[i].position = hit.point;
+                groundPoint = info.point;
+                validSpot = !Physics.CheckBox(groundPoint + new Vector3(0f, 2f, 0f), new Vector3(.82f, 1.31f, .525f), Quaternion.identity);
             }
-        }
+        } while (!validSpot);
+
+        return groundPoint;
     }
 
-    // TODO: 
-    // revamp waypoint system by picking random locations on the map instead of set waypoints
-    // use Physics.CheckBox() to prevent spawning inside objects 
-    // for waypoints close to player, get a position within a circle created around the player
-    // ^^ no idea how to do the above bit, but it's all about experimentation! :D
-    public Transform GetClosestWaypoint()
+    public static Vector3 GetClosestPoint(float radius = 20f, float minDistance = 10f)
     {
-        Vector3 plrPos = player.transform.position;
-        Transform closestPoint = null;
-        float minDist = float.MaxValue;
+        bool validSpot = false;
+        Vector3 groundPoint = Vector3.zero;
 
-        for (int i = 0; i < waypoints.Length; i++)
+        do
         {
-            float dist = Vector3.Distance(plrPos, waypoints[i].position);
-            if (dist < minDist)
+            Vector2 point2;
+
+            point2 = Random.insideUnitCircle * radius + new Vector2(playerTransform.position.x, playerTransform.position.z);
+            point2 += new Vector2(minDistance + 4f, 0f) * Mathf.Sign(point2.x);
+            point2 += new Vector2(0f, minDistance + 4f) * Mathf.Sign(point2.y);
+            groundPoint = new Vector3(point2.x, 50f, point2.y);
+
+            if (Physics.Raycast(groundPoint, Vector3.down, out RaycastHit info, 100f))
+                groundPoint = info.point;
+            else
+                continue;
+
+            if (Physics.CheckBox(groundPoint + new Vector3(0f, 2f, 0f), new Vector3(.82f, 1.31f, .525f), Quaternion.identity))
+                continue;
+
+            validSpot = true;
+            float distance = Vector3.Distance(playerTransform.position, groundPoint);
+            if (distance < minDistance)
             {
-                minDist = dist;
-                closestPoint = waypoints[i];
+                point2 += new Vector2(minDistance, 0f) * Mathf.Sign(point2.x);
+                point2 += new Vector2(0f, minDistance) * Mathf.Sign(point2.y);
+                groundPoint = new Vector3(point2.x, 50f, point2.y);
+
+                if (Physics.Raycast(groundPoint, Vector3.down, out RaycastHit info2, 100f))
+                    groundPoint = info2.point;
+                else {
+                    validSpot = false;
+                    continue;
+                }
             }
-        }
+        } while (!validSpot);
 
-        //if (Vector3.Distance(closestPoint.position, plrPos) < 5f) { }
-
-        return closestPoint;
-    }
-
-    public Transform GetRandomWaypoint(Transform curPoint = null)
-    {
-        Transform newPoint = waypoints[Random.Range(0, waypoints.Length)];
-
-        // prevents the new point from being the current point if one is provided
-        while (newPoint == curPoint) { newPoint = waypoints[Random.Range(0, waypoints.Length)]; }
-
-        return newPoint;
-    }
-
-    public static Vector3 RandomPointInBox(Vector3 center, Vector3 size)
-    {
-        Vector3 randomVec = new Vector3(
-            (Random.value - .5f) * size.x,
-            (Random.value - .5f) * size.y,
-            (Random.value - .5f) * size.z
-        );
-
-        return center + randomVec;
+        return groundPoint;
     }
 }

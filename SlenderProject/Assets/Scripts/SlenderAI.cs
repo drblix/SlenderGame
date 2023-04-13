@@ -3,7 +3,6 @@ using UnityEngine.UI;
 
 public class SlenderAI : MonoBehaviour
 {
-    private WaypointManager pointManager;
     private GameManager gameManager;
 
     private Transform player;
@@ -47,7 +46,6 @@ public class SlenderAI : MonoBehaviour
 
     private void Awake()
     {
-        pointManager = FindObjectOfType<WaypointManager>();
         gameManager = FindObjectOfType<GameManager>();
         player = FindObjectOfType<Player>().transform;
         mainCam = player.Find("Head").Find("MainCamera");
@@ -72,11 +70,11 @@ public class SlenderAI : MonoBehaviour
 
             if (curState == SlenderStates.Searching)
             {
-                slenderMan.transform.position = pointManager.GetRandomWaypoint().position;
+                slenderMan.transform.position = WaypointManager.GetRandomPoint();
             }
             else
             {
-                slenderMan.transform.position = pointManager.GetClosestWaypoint().position;
+                slenderMan.transform.position = WaypointManager.GetClosestPoint();
             }
         }
 
@@ -133,7 +131,7 @@ public class SlenderAI : MonoBehaviour
         tpTimer = MAX_TP_TIMER - (20f * gameManager.currentPages);
         sightDist = MIN_SIGHT_DIST + (15.625f * gameManager.currentPages);
 
-        if (gameManager.currentPages >= 1) { slenderMan.SetActive(true); }
+        slenderMan.SetActive(gameManager.currentPages >= 1);
     }
 
     public bool CanSeePlayer()

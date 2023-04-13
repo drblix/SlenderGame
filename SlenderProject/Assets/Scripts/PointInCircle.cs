@@ -17,22 +17,41 @@ public class PointInCircle : MonoBehaviour
         new GameObject("CirclePoint").transform.position = point3;
         */
 
-        StartCoroutine(PointRoutine());
+        // StartCoroutine(PointRoutine());
     }
 
     private IEnumerator PointRoutine()
     {
         while (true)
         {
-            float radius = transform.localScale.x / 2f;
+            const float MIN_DISTANCE = 10f;
+            const float RADIUS = 20f;
+            Vector2 point2;
+            Vector3 point3;
 
-            Vector2 randPoint = Random.insideUnitCircle;
-            Vector2 circlePoint = new Vector2(Mathf.Clamp(randPoint.x, -1f, 1f), Mathf.Clamp(randPoint.y, -1f, 1f));
-            Vector2 point2 = circlePoint * radius + new Vector2(transform.position.x, transform.position.z);
-            Vector3 point3 = new Vector3(point2.x, transform.position.y, point2.y);
-            new GameObject("CirclePoint").transform.position = point3;
+            point2 = Random.insideUnitCircle * RADIUS + new Vector2(transform.position.x, transform.position.z);
+            point2 += new Vector2(MIN_DISTANCE + 4f, 0f) * Mathf.Sign(point2.x);
+            point2 += new Vector2(0f, MIN_DISTANCE + 4f) * Mathf.Sign(point2.y);
+            point3 = new Vector3(point2.x, transform.position.y, point2.y);
 
-            yield return new WaitForSeconds(1f);
+            GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            Destroy(obj.GetComponent<BoxCollider>());
+            obj.transform.position = point3;
+            obj.transform.localScale = Vector3.one * .1f;
+
+            if (Physics.CheckBox(point3, obj.transform.localScale / 2f, Quaternion.identity))
+                Destroy(obj);
+
+            float distance = Vector2.Distance(new Vector2(transform.position.x, transform.position.z), point2);
+            if (distance < MIN_DISTANCE)
+            {
+                point2 += new Vector2(MIN_DISTANCE, 0f) * Mathf.Sign(point2.x);
+                point2 += new Vector2(0f, MIN_DISTANCE) * Mathf.Sign(point2.y);
+                point3 = new Vector3(point2.x, transform.position.y, point2.y);
+                obj.transform.position = point3;
+            }
+
+            yield return new WaitForSeconds(.1f);
         }
     }
 }

@@ -212,7 +212,7 @@ public class Player : MonoBehaviour
 
     private void HandleFootsteps()
     {
-        if (!IsMoving() || stepSource.isPlaying) { return; }
+        if (!IsMoving() || stepSource.isPlaying || mainCam.localPosition.y > -.02f) { return; }
 
         stepSource.clip = stepClips[Random.Range(0, stepClips.Length)];
         stepSource.Play();
