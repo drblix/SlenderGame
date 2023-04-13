@@ -40,9 +40,9 @@ public class SlenderAI : MonoBehaviour
     private float sightDist = 75f;
 
     private bool seesPlayer = false;
+    private bool hasBeenSeen = false;
 
     private SlenderStates curState = SlenderStates.Searching;
-
 
     private void Awake()
     {
@@ -76,6 +76,8 @@ public class SlenderAI : MonoBehaviour
             {
                 slenderMan.transform.position = WaypointManager.GetClosestPoint();
             }
+
+            hasBeenSeen = false;
         }
 
         if (sightTimer >= 6f)

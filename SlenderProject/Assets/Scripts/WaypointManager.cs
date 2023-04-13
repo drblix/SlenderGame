@@ -39,7 +39,7 @@ public class WaypointManager : MonoBehaviour
         return groundPoint;
     }
 
-    public static Vector3 GetClosestPoint(float radius = 20f, float minDistance = 10f)
+    public static Vector3 GetClosestPoint(float radius = 18f, float minDistance = 6f)
     {
         bool validSpot = false;
         Vector3 groundPoint = Vector3.zero;
