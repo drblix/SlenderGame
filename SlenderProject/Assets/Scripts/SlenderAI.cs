@@ -25,7 +25,7 @@ public class SlenderAI : MonoBehaviour
 
     private const float MAX_TP_TIMER = 180f;
     private const float MIN_SIGHT_DIST = 75f;
-
+    private const float LOS_TIMER = 4f;
     private float lookAmount = 0f;
 
     private float moveTimer = 0f;
@@ -80,7 +80,7 @@ public class SlenderAI : MonoBehaviour
             hasBeenSeen = false;
         }
 
-        if (sightTimer >= 6f)
+        if (sightTimer >= LOS_TIMER)
         {
             sightTimer = 0f;
             seesPlayer = CanSeePlayer();
@@ -90,7 +90,11 @@ public class SlenderAI : MonoBehaviour
 
         slenderMan.transform.rotation = Quaternion.Euler(new(slenderMan.transform.eulerAngles.x, CalculatePAngle(), slenderMan.transform.eulerAngles.z));
 
-        moveTimer += Time.deltaTime;
+        if (hasBeenSeen)
+            moveTimer += Time.deltaTime * 2f;
+        else
+            moveTimer += Time.deltaTime;
+        
         sightTimer += Time.deltaTime;
         jumpscareTimer -= Time.deltaTime;
     }
@@ -103,6 +107,8 @@ public class SlenderAI : MonoBehaviour
         // look amount maxed at 5
         if (Physics.SphereCast(ray, 11f, 38f, LayerMask.GetMask("Slender")) || Vector3.Distance(player.position, slenderMan.transform.position) < 10f)
         {
+            hasBeenSeen = true;
+
             if (!audSources[0].isPlaying && jumpscareTimer <= 0f) {
                 audSources[0].Play();
                 jumpscareTimer = 12f;
@@ -112,7 +118,7 @@ public class SlenderAI : MonoBehaviour
         }
         else
         {
-            lookAmount -= Time.deltaTime;
+            lookAmount -= Time.deltaTime / 3f;
         }
 
         lookAmount = Mathf.Clamp(lookAmount, 0f, 5f);
@@ -139,10 +145,7 @@ public class SlenderAI : MonoBehaviour
     public bool CanSeePlayer()
     {
         Ray ray = new(slenderMan.transform.position, player.position - slenderMan.transform.position);
-
-        if (Physics.Raycast(ray, sightDist, LayerMask.GetMask("Player"))) { return true; }
-
-        return false;
+        return Physics.Raycast(ray, sightDist, LayerMask.GetMask("Player"));
     }
 
     private float CalculatePAngle()

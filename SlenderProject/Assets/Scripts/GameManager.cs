@@ -6,7 +6,7 @@ using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public UnityEvent pageCollected;
+    [HideInInspector] public UnityEvent pageCollected;
 
     [SerializeField] private RawImage staticVid;
 
